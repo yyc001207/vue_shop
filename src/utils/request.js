@@ -11,9 +11,10 @@ const requests = axios.create({
 
 // 请求拦截
 requests.interceptors.request.use(
+
     config => {
         if (store.getters.token) {
-            config.headers['token'] = getToken()
+            config.headers.Authorization = getToken()
         }
         return config
     },
@@ -26,16 +27,17 @@ requests.interceptors.request.use(
 requests.interceptors.response.use(
     response => {
         const res = response.data
-        if (res.meta.status != 200) {
+        // console.log(res);
+        if (res.meta.status == 200 || res.meta.status == 201) {
+            return res
+        }
+        else {
             Message({
                 message: res.meta.msg || 'Error',
                 type: 'error',
                 duration: 5 * 1000
             })
             return Promise.reject('状态码：' + res.meta.status)
-        }
-        else {
-            return res
         }
     },
     error => {

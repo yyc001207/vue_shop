@@ -9,8 +9,10 @@ import store from '@/store'
 // 引入导航守卫
 import "@/router/permission"
 
-Vue.config.productionTip = false
+import '@/assets/fonts/iconfont.css'
 
+Vue.config.productionTip = false
+Vue.config.devtools = true;
 new Vue({
   router,
   store,

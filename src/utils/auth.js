@@ -9,3 +9,6 @@ export function setToken(token) {
 export function removeToken() {
     window.sessionStorage.removeItem(Tokenkey)
 }
+export function clearSessionStorage() {
+    window.sessionStorage.clear()
+}
