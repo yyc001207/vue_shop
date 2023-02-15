@@ -11,6 +11,10 @@ import "@/router/permission"
 
 import '@/assets/fonts/iconfont.css'
 
+// 注册全局组件
+import UserDialog from '@/components/UserDialog'
+Vue.component(UserDialog.name, UserDialog)
+
 Vue.config.productionTip = false
 Vue.config.devtools = true;
 new Vue({

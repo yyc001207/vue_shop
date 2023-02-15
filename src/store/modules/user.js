@@ -1,4 +1,4 @@
-import { reqAddUser, reqGetUserList, reqLogin, reqUserStateChanged } from '@/api/user'
+import { reqAddUser, reqEditUser, reqGetUserById, reqGetUserList, reqLogin, reqRemoveUserById, reqUserStateChanged } from '@/api/user'
 import { getToken, setToken, clearSessionStorage } from '@/utils/auth'
 
 const actions = {
@@ -32,6 +32,19 @@ const actions = {
     // 添加用户
     async addUser({ commit }, addForm) {
         await reqAddUser(addForm)
+    },
+    // 根据id获取用户
+    async getUserById({ commit }, id) {
+        let result = await reqGetUserById(id)
+        commit('GETUSERBYID', result.data)
+    },
+    // 修改用户
+    async editUser({ commit }, data) {
+        await reqEditUser(data)
+    },
+    // 删除用户
+    async removeUserById({ commit }, id) {
+        await reqRemoveUserById(id)
     }
 }
 const mutations = {
@@ -45,12 +58,16 @@ const mutations = {
     },
     GETUSERLIST: (state, userList) => {
         state.userList = userList
+    },
+    GETUSERBYID: (state, userById) => {
+        state.userById = userById
     }
 }
 const state = {
     userInfo: {},
     token: getToken(),
-    userList: {}
+    userList: {},
+    userById: {}
 }
 
 export default {
