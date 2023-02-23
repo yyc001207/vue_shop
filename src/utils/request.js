@@ -27,7 +27,6 @@ requests.interceptors.request.use(
 requests.interceptors.response.use(
     response => {
         const res = response.data
-        // console.log(res);
         if (res.meta.status == 200 || res.meta.status == 201) {
             return res
         }

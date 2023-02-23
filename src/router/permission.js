@@ -14,6 +14,9 @@ router.beforeEach((to, from, next) => {
             })
             next({ path: `${from.path}` })
         } else {
+            if (to.path == '/welcome') {
+                window.sessionStorage.removeItem('activePath')
+            }
             next()
         }
     }

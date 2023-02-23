@@ -104,7 +104,9 @@ export default {
     saveNavState(activePath) {
       window.sessionStorage.setItem('activePath', activePath)
     },
+  
   },
+  
 }
 </script>
 

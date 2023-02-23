@@ -1,4 +1,4 @@
-import { reqAddUser, reqEditUser, reqGetUserById, reqGetUserList, reqLogin, reqRemoveUserById, reqUserStateChanged } from '@/api/user'
+import { reqAddUser, reqEditUser, reqGetUserById, reqGetUserList, reqLogin, reqRemoveUserById, reqSaveRoleInfo, reqUserStateChanged } from '@/api/user'
 import { getToken, setToken, clearSessionStorage } from '@/utils/auth'
 
 const actions = {
@@ -45,6 +45,11 @@ const actions = {
     // 删除用户
     async removeUserById({ commit }, id) {
         await reqRemoveUserById(id)
+    },
+    // 分配角色
+    async saveRoleInfo({ commit }, data) {
+        const { id, rid } = data
+        await reqSaveRoleInfo(id, rid)
     }
 }
 const mutations = {

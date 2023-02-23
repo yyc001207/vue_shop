@@ -38,3 +38,6 @@ export const reqEditUser = (data) => request({ url: `users/${data.id}`, data, me
 
 // 删除用户
 export const reqRemoveUserById = (id) => request({ url: `users/${id}`, method: 'delete' })
+
+// 分配角色
+export const reqSaveRoleInfo = (id, rid) => request.put(`users/${id}/role`, { rid })

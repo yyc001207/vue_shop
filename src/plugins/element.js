@@ -23,10 +23,18 @@ import {
     Tooltip,
     Pagination,
     Dialog,
-    MessageBox
-
+    MessageBox,
+    Tag,
+    Loading,
+    Tree,
+    Select,
+    Option
 } from 'element-ui'
 
+Vue.use(Tag)
+Vue.use(Select)
+Vue.use(Option)
+Vue.use(Tree)
 Vue.use(Dialog)
 Vue.use(Pagination)
 Vue.use(Tooltip)
@@ -49,5 +57,6 @@ Vue.use(MenuItem)
 Vue.use(Breadcrumb)
 Vue.use(BreadcrumbItem)
 Vue.use(Card)
+Vue.use(Loading.directive);
 Vue.prototype.$message = Message
 Vue.prototype.$confirm = MessageBox.confirm

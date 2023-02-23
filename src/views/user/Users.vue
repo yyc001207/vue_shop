@@ -1,11 +1,7 @@
 <template>
   <div>
     <!-- 面包屑 -->
-    <el-breadcrumb separator-class="el-icon-arrow-right">
-      <el-breadcrumb-item :to="{ path: '/home' }">首页</el-breadcrumb-item>
-      <el-breadcrumb-item>用户管理</el-breadcrumb-item>
-      <el-breadcrumb-item>用户列表</el-breadcrumb-item>
-    </el-breadcrumb>
+    <Breadcrumb breadcrumb1="用户管理" breadcrumb2="用户列表"></Breadcrumb>
     <!-- 卡片视图 -->
     <el-card>
       <!-- 搜索区域 -->
@@ -43,7 +39,7 @@
             ></el-switch>
           </template>
         </el-table-column>
-        <el-table-column label="操作">
+        <el-table-column label="操作" width="300px">
           <template slot-scope="scope">
             <el-button
               type="primary"
@@ -67,6 +63,7 @@
                 type="warning"
                 icon="el-icon-s-tools"
                 size="mini"
+                @click="setRole(scope.row)"
               ></el-button>
             </el-tooltip>
           </template>
@@ -77,7 +74,7 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         :current-page="queryInfo.pagenum"
-        :page-sizes="[2, 3, 5]"
+        :page-sizes="[3, 5, 10]"
         :page-size="queryInfo.pagesize"
         layout="total, sizes, prev, pager, next, jumper"
         :total="total"
@@ -85,16 +82,49 @@
       </el-pagination>
     </el-card>
     <!-- 添加用户对话框 -->
-    <UserDialog
+    <Dialog
       :showDialog="showDialog"
-      @userDialogClosed="userDialogClosed"
+      @dialogClosed="dialogClosed"
       :id="id"
-    ></UserDialog>
+      :isUser="isUser"
+    ></Dialog>
+    <!-- 分配角色 -->
+    <el-dialog
+      title="分配角色"
+      :visible.sync="setRoleDialogVisible"
+      width="50%"
+      @close="setRoleDialogClose"
+      v-loading.lock="fullscreenLoading"
+      element-loading-text="拼命加载中"
+      element-loading-spinner="el-icon-loading"
+      element-loading-background="rgba(0, 0, 0, 0.8)"
+    >
+      <div>
+        <p>当前用户:{{ userInfo.username }}</p>
+        <p>当前角色:{{ userInfo.role_name }}</p>
+        <p>
+          分配新角色:
+          <el-select v-model="selectedRoleId" placeholder="请选择">
+            <el-option
+              v-for="item in rolesList"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+        </p>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="setRoleDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="saveRoleInfo">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { mapState } from 'vuex'
+import debounce from 'lodash/debounce'
 export default {
   name: 'Users',
   data() {
@@ -103,16 +133,26 @@ export default {
       queryInfo: {
         query: '', // 搜索参数
         pagenum: 1, // 当前页数
-        pagesize: 2, // 每页数据条数
+        pagesize: 3, // 每页数据条数
       },
       total: 0, // 数据总条数
       showDialog: 0, // 控制用户对话框显示隐藏，0隐藏，1添加，2修改
+      // 被修改用户的id
       id: '',
+      // 通知子组件我是Users组件
+      isUser: true,
+      // 分配角色弹框
+      setRoleDialogVisible: false,
+      // 需要分配权限的角色信息
+      userInfo: {},
+      fullscreenLoading: false,
+      selectedRoleId: '',
     }
   },
   computed: {
     ...mapState({
       userList: (state) => state.user.userList,
+      rolesList: (state) => state.authority.rolesList,
     }),
   },
   mounted() {
@@ -134,8 +174,8 @@ export default {
       this.queryInfo.pagenum = newPage
       this.getUserList()
     },
-    // 监听switch开关状态
-    userStateChanged(userinfo) {
+    // 开关防抖
+    changed: debounce(function (userinfo) {
       const { id, mg_state } = userinfo
       this.$store
         .dispatch('userStateChanged', { id, mg_state })
@@ -146,9 +186,13 @@ export default {
           this.$message.error('修改失败')
           userinfo.mg_state = !mg_state
         })
+    }, 1000),
+    // 监听switch开关状态
+    userStateChanged(userinfo) {
+      this.changed(userinfo)
     },
     // 关闭对话框
-    userDialogClosed() {
+    dialogClosed() {
       this.id = ''
       this.showDialog = 0
       this.getUserList()
@@ -179,6 +223,41 @@ export default {
         .catch(() => {
           this.$message.info('取消删除')
         })
+    },
+    // 展示分配角色按钮
+    setRole(userInfo) {
+      this.fullscreenLoading = true
+      this.userInfo = userInfo
+      this.$store
+        .dispatch('getRolesList')
+        .then(() => {
+          this.fullscreenLoading = false
+          this.setRoleDialogVisible = true
+        })
+        .catch(() => {
+          this.$message.error('获取角色列表失败')
+        })
+    },
+    // 点击弹出框确定按钮,保存角色修改
+    saveRoleInfo() {
+      this.$store
+        .dispatch('saveRoleInfo', {
+          id: this.userInfo.id,
+          rid: this.selectedRoleId,
+        })
+        .then(() => {
+          this.$message.success('分配成功')
+          this.setRoleDialogVisible = false
+          this.getUserList()
+        })
+        .catch(() => {
+          this.$message.error('分配失败')
+        })
+    },
+    // 关闭对话框，重置数据
+    setRoleDialogClose() {
+      this.selectedRoleId = ''
+      this.userInfo = {}
     },
   },
 }
