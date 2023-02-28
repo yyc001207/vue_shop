@@ -100,10 +100,10 @@
 
 <script>
 import { mapState } from 'vuex'
-import { userAddFormRulesMixin } from '@/mixin/formValidation'
+import { addFormRulesMixin } from '@/mixin/formValidation'
 export default {
   name: 'Dialog',
-  mixins: [userAddFormRulesMixin], // mixin混入添加表单验证规则
+  mixins: [addFormRulesMixin], // mixin混入添加表单验证规则
   data() {
     return {
       addForm: {
@@ -170,9 +170,11 @@ export default {
     dialogClosed() {
       this.$emit('dialogClosed')
       this.$refs.addFormRef.resetFields()
-      this.addForm.cat_pid = 0
-      this.addForm.cat_level = 0
-      this.selectedKeys = []
+      if (this.isCate && this.showDialog == 1) {
+        this.addForm.cat_pid = 0
+        this.addForm.cat_level = 0
+        this.selectedKeys = []
+      }
     },
     determine(add, edit, data) {
       this.$refs.addFormRef.validate((valid) => {

@@ -117,10 +117,12 @@ export default {
     removeCateById(cateId) {
       this.remove('removeCateById', cateId, this.getCateList)
     },
+    // 修改分类按钮
     updateCatName(id) {
       this.id = id
       this.showDialog = 2
     },
+    // 弹出框关闭，初始化数据，重新请求数据
     dialogClosed() {
       this.id = ''
       this.showDialog = 0

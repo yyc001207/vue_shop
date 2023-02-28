@@ -1,4 +1,4 @@
-export const userAddFormRulesMixin = {
+export const addFormRulesMixin = {
     data() {
         // 邮箱验证规则
         const checkEmail = (rules, value, callback) => {
@@ -11,7 +11,6 @@ export const userAddFormRulesMixin = {
         const checkMobile = (rules, value, callback) => {
             const regMobile = /^1[3-9]\d{9}$/
             if (regMobile.test(value)) return callback()
-
             callback(new Error('请输入合法手机号'))
         }
         return {
