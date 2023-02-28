@@ -28,11 +28,13 @@ import {
     Loading,
     Tree,
     Select,
-    Option
+    Option,
+    Cascader
 } from 'element-ui'
 
-Vue.use(Tag)
 Vue.use(Select)
+Vue.use(Tag)
+Vue.use(Cascader)
 Vue.use(Option)
 Vue.use(Tree)
 Vue.use(Dialog)

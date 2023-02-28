@@ -18,6 +18,13 @@ Vue.component(Dialog.name, Dialog)
 import Breadcrumb from '@/components/Breadcrumb'
 Vue.component(Breadcrumb.name, Breadcrumb)
 
+import Pagination from '@/components/Pagination'
+Vue.component(Pagination.name, Pagination)
+
+// 引入一个全局的删除方法
+import remove from '@/utils/remove'
+Vue.prototype.remove = remove
+
 Vue.config.productionTip = false
 Vue.config.devtools = true;
 new Vue({

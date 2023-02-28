@@ -131,6 +131,7 @@
 </template>
 
 <script>
+import remove from '@/utils/remove'
 import { mapState } from 'vuex'
 export default {
   name: 'Roles',
@@ -161,6 +162,15 @@ export default {
   mounted() {
     this.getRolesList()
   },
+  watch: {
+    rightById() {
+      this.rolesList.forEach((item) => {
+        if ((item.id = this.roleId)) {
+          item.children = this.rightById
+        }
+      })
+    },
+  },
   methods: {
     // 获取角色列表
     getRolesList() {
@@ -179,42 +189,12 @@ export default {
     },
     // 根据id删除角色
     removeRoleById(id) {
-      this.removeById(id, 'removeRoleById')
+      this.remove('removeRoleById', id, this.getRolesList)
     },
     // 根据id删除权限
     removeRightById(role, rightId) {
-      let roleId = role.id
-      this.removeById({ roleId, rightId }, 'removeRightById', role)
-    },
-    // 根据id删除角色或权限的方法
-    removeById(id, fn, role) {
-      this.$confirm(
-        typeof id == 'number'
-          ? '此操作将永久删除该角色, 是否继续?'
-          : '此操作将永久删除该角色拥有权限, 是否继续?',
-        '提示',
-        {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning',
-        }
-      )
-        .then(() => {
-          this.$store
-            .dispatch(fn, id)
-            .then(() => {
-              typeof id == 'number'
-                ? this.getRolesList()
-                : (role.children = this.rightById)
-              this.$message.info('删除成功')
-            })
-            .catch(() => {
-              this.$message.info('删除失败')
-            })
-        })
-        .catch(() => {
-          this.$message.info('取消删除')
-        })
+      let roleId = (this.roleId = role.id)
+      this.remove('removeRightById', { roleId, rightId })
     },
     // 点击分配权限按钮
     showSetRightDialog(role) {

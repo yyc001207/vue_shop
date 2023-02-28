@@ -15,9 +15,13 @@
         <span v-if="showDialog == 1">{{ '添加用户' }}</span>
         <span v-else>{{ '修改用户' }}</span>
       </div>
-      <div slot="title" v-else>
+      <div slot="title" v-else-if="isRoles">
         <span v-if="showDialog == 1">{{ '添加角色' }}</span>
         <span v-else>{{ '修改角色' }}</span>
+      </div>
+      <div slot="title" v-else>
+        <span v-if="showDialog == 1">{{ '添加分类' }}</span>
+        <span v-else>{{ '修改分类' }}</span>
       </div>
       <!-- 内容主体 -->
       <el-form
@@ -48,7 +52,7 @@
           </el-form-item>
         </div>
         <!-- 角色 -->
-        <div v-else>
+        <div v-else-if="isRoles">
           <el-form-item label="角色名称" prop="roleName">
             <el-input v-model="addForm.roleName">{{
               addForm.roleName
@@ -58,6 +62,30 @@
             <el-input v-model="addForm.roleDesc">{{
               addForm.roleDesc
             }}</el-input>
+          </el-form-item>
+        </div>
+        <!-- 分类 -->
+        <div v-else>
+          <el-form-item label="分类名称" prop="cat_name">
+            <el-input v-model="addForm.cat_name">{{
+              addForm.cat_name
+            }}</el-input>
+          </el-form-item>
+          <el-form-item label="父级分类" v-if="showDialog == 1">
+            <el-cascader
+              clearable
+              filterable
+              v-model="selectedKeys"
+              :options="cateListType2"
+              :props="{
+                expandTrigger: 'hover',
+                value: 'cat_id',
+                label: 'cat_name',
+                children: 'children',
+                checkStrictly: 'true',
+              }"
+              @change="handleChange"
+            ></el-cascader>
           </el-form-item>
         </div>
       </el-form>
@@ -72,70 +100,47 @@
 
 <script>
 import { mapState } from 'vuex'
+import { userAddFormRulesMixin } from '@/mixin/formValidation'
 export default {
   name: 'Dialog',
+  mixins: [userAddFormRulesMixin], // mixin混入添加表单验证规则
   data() {
-    // 邮箱验证规则
-    const checkEmail = (rules, value, callback) => {
-      // 邮箱验证正则
-      const regEmail = /^([A-z0-9_-])+@([A-z0-9_-])+(\.[A-z0-9_-])+/
-      if (regEmail.test(value)) return callback()
-      callback(new Error('请输入合法邮箱'))
-    }
-    // 手机号验证规则
-    const checkMobile = (rules, value, callback) => {
-      const regMobile = /^1[3-9]\d{9}$/
-      if (regMobile.test(value)) return callback()
-
-      callback(new Error('请输入合法手机号'))
-    }
     return {
       addForm: {
+        // 用户
         username: '',
         password: '',
         email: '',
         mobile: '',
+        // 角色
         roleName: '',
         roleDesc: '',
+        // 分类
+        cat_name: '',
+        cat_pid: 0,
+        cat_level: 0,
       }, // 添加用户的数据
       dialogVisible: false,
       fullscreenLoading: false,
-      // 添加表单验证规则
-      addFormRules: {
-        username: [
-          { required: true, message: '请输入用户名', trigger: 'blur' },
-          { min: 3, max: 10, message: '长度在3至10个字符', trigger: 'blur' },
-        ],
-        password: [
-          { required: true, message: '请输入密码', trigger: 'blur' },
-          { min: 6, max: 15, message: '长度在6至15个字符', trigger: 'blur' },
-        ],
-        email: [
-          { required: true, message: '请输入邮箱', trigger: 'blur' },
-          { validator: checkEmail, trigger: 'blur' },
-        ],
-        mobile: [
-          { required: true, message: '请输入手机号', trigger: 'blur' },
-          { validator: checkMobile, trigger: 'blur' },
-        ],
-        roleName: [
-          { required: true, message: '请输入角色名', trigger: 'blur' },
-          { min: 2, max: 10, message: '长度在3至10个字符', trigger: 'blur' },
-        ],
-      },
+      selectedKeys: [], // 选择框数组
     }
   },
   computed: {
     ...mapState({
       userById: (state) => state.user.userById,
       roleById: (state) => state.authority.roleById,
+      catNameById: (state) => state.goods.catNameById,
+      cateListType2: (state) => state.goods.cateListType2,
     }),
   },
-  props: ['showDialog', 'id', 'isUser', 'isRoles'],
+  props: ['showDialog', 'id', 'isUser', 'isRoles', 'isCate'],
   watch: {
     showDialog() {
       if (this.showDialog != 0) {
         this.dialogVisible = true
+        if (this.showDialog == 1 && this.isCate) {
+          this.$store.dispatch('getCateListType2', { type: 2 })
+        }
       }
     },
     id() {
@@ -143,18 +148,21 @@ export default {
         this.fullscreenLoading = true
         if (this.isUser) {
           this.$store.dispatch('getUserById', this.id)
-        } else {
+        } else if (this.isRoles) {
           this.$store.dispatch('getRoleById', this.id)
+        } else {
+          this.$store.dispatch('getCatNameById', this.id)
         }
       }
     },
     userById() {
       this.addFormAssignment(this.userById)
-      this.fullscreenLoading = false
     },
     roleById() {
       this.addFormAssignment(this.roleById)
-      this.fullscreenLoading = false
+    },
+    catNameById() {
+      this.addFormAssignment(this.catNameById)
     },
   },
   methods: {
@@ -162,6 +170,9 @@ export default {
     dialogClosed() {
       this.$emit('dialogClosed')
       this.$refs.addFormRef.resetFields()
+      this.addForm.cat_pid = 0
+      this.addForm.cat_level = 0
+      this.selectedKeys = []
     },
     determine(add, edit, data) {
       this.$refs.addFormRef.validate((valid) => {
@@ -188,21 +199,37 @@ export default {
     },
     // 点击弹出框确定按钮
     addAndEdit() {
-      const { mobile, email, roleName, roleDesc } = this.addForm
+      const { mobile, email, roleName, roleDesc, cat_name } = this.addForm
       const { id } = this
       if (this.isUser) {
         this.determine('addUser', 'editUser', { id, mobile, email })
-      } else {
+      } else if (this.isRoles) {
         this.determine('addRole', 'editRole', { id, roleName, roleDesc })
+      } else {
+        this.determine('addCate', 'editCatName', { id, cat_name })
       }
     },
     // addform表单赋值
     addFormAssignment(obj) {
       Object.keys(this.addForm).forEach((key) => (this.addForm[key] = obj[key]))
+      this.fullscreenLoading = false
+    },
+    // 选择框发生变化
+    handleChange() {
+      if (this.selectedKeys.length > 0) {
+        this.addForm.cat_pid = this.selectedKeys[this.selectedKeys.length - 1]
+        this.addForm.cat_level = this.selectedKeys.length
+      } else {
+        this.addForm.cat_pid = 0
+        this.addForm.cat_level = 0
+      }
     },
   },
 }
 </script>
 
-<style>
+<style lang='less' scoped>
+.el-cascader-panel {
+  width: 100%;
+}
 </style>

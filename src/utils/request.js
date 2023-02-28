@@ -5,7 +5,7 @@ import { getToken } from "@/utils/auth"
 
 
 const requests = axios.create({
-    baseURL: '/',
+    baseURL: '/api/private/v1',
     timeout: 5000
 })
 

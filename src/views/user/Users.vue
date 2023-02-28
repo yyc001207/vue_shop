@@ -70,16 +70,12 @@
         </el-table-column>
       </el-table>
       <!-- 分页器 -->
-      <el-pagination
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-        :current-page="queryInfo.pagenum"
-        :page-sizes="[3, 5, 10]"
-        :page-size="queryInfo.pagesize"
-        layout="total, sizes, prev, pager, next, jumper"
+      <Pagination
         :total="total"
-      >
-      </el-pagination>
+        :pagesize="queryInfo.pagesize"
+        :pagenum="queryInfo.pagenum"
+        @pageChange="pageChange"
+      ></Pagination>
     </el-card>
     <!-- 添加用户对话框 -->
     <Dialog
@@ -164,14 +160,11 @@ export default {
         this.total = this.userList.total
       })
     },
-    // 监听pagesize改变
-    handleSizeChange(newSize) {
-      this.queryInfo.pagesize = newSize
-      this.getUserList()
-    },
-    // 监听 页码值改变
-    handleCurrentChange(newPage) {
-      this.queryInfo.pagenum = newPage
+    // 分页器
+    pageChange(data, isSize) {
+      isSize
+        ? (this.queryInfo.pagesize = data)
+        : (this.queryInfo.pagenum = data)
       this.getUserList()
     },
     // 开关防抖
@@ -204,25 +197,7 @@ export default {
     },
     // 删除用户
     removeUserById(id) {
-      this.$confirm('此操作将永久删除该用户, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning',
-      })
-        .then(() => {
-          this.$store
-            .dispatch('removeUserById', id)
-            .then(() => {
-              this.$message.info('删除成功')
-              this.getUserList()
-            })
-            .catch(() => {
-              this.$message.error('删除失败')
-            })
-        })
-        .catch(() => {
-          this.$message.info('取消删除')
-        })
+      this.remove('removeUserById', id, this.getUserList)
     },
     // 展示分配角色按钮
     setRole(userInfo) {
