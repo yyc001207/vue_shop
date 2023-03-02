@@ -13,7 +13,7 @@
       </el-row>
       <!-- 表格区 -->
       <el-table
-        :data="cateList.result"
+        :data="cateListPage.result"
         border
         row-key="cat_id"
         :tree-props="{ children: 'children' }"
@@ -87,9 +87,10 @@ export default {
         pagesize: 3, // 每页数据条数
       },
       total: 0, // 数据总条数
-      showDialog: 0,
+      showDialog: 0,// 控制用户对话框显示隐藏，0隐藏，1添加，2修改
       id: '',
       isCate: true,
+      cateListPage: {}, // 具有分页的分类列表
     }
   },
   computed: {
@@ -104,6 +105,7 @@ export default {
     getCateList() {
       this.$store.dispatch('getCateList', this.queryInfo).then(() => {
         this.total = this.cateList.total
+        this.cateListPage = this.cateList
       })
     },
     // 分页器
@@ -115,7 +117,12 @@ export default {
     },
     // 根据id删除商品分类
     removeCateById(cateId) {
-      this.remove('removeCateById', cateId, this.getCateList)
+      this.$remove('removeCateById', cateId).then(() => {
+        if (this.cateListPage.result.length == 1) {
+          this.queryInfo.pagenum -= 1
+        }
+        this.getCateList()
+      })
     },
     // 修改分类按钮
     updateCatName(id) {

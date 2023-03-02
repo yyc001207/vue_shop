@@ -197,7 +197,9 @@ export default {
     },
     // 删除用户
     removeUserById(id) {
-      this.remove('removeUserById', id, this.getUserList)
+      this.$remove('removeUserById', id).then(() => {
+        this.getUserList()
+      })
     },
     // 展示分配角色按钮
     setRole(userInfo) {

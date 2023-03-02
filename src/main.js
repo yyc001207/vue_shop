@@ -21,9 +21,12 @@ Vue.component(Breadcrumb.name, Breadcrumb)
 import Pagination from '@/components/Pagination'
 Vue.component(Pagination.name, Pagination)
 
+import CateSelect from '@/components/CateSelect'
+Vue.component(CateSelect.name, CateSelect)
+
 // 引入一个全局的删除方法
 import remove from '@/utils/remove'
-Vue.prototype.remove = remove
+Vue.prototype.$remove = remove
 
 Vue.config.productionTip = false
 Vue.config.devtools = true;

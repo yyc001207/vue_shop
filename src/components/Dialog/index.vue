@@ -65,27 +65,17 @@
           </el-form-item>
         </div>
         <!-- 分类 -->
-        <div v-else>
+        <div v-else-if="isCate">
           <el-form-item label="分类名称" prop="cat_name">
             <el-input v-model="addForm.cat_name">{{
               addForm.cat_name
             }}</el-input>
           </el-form-item>
           <el-form-item label="父级分类" v-if="showDialog == 1">
-            <el-cascader
-              clearable
-              filterable
-              v-model="selectedKeys"
-              :options="cateListType2"
-              :props="{
-                expandTrigger: 'hover',
-                value: 'cat_id',
-                label: 'cat_name',
-                children: 'children',
-                checkStrictly: 'true',
-              }"
-              @change="handleChange"
-            ></el-cascader>
+            <CateSelect
+              :cateList="cateListType2"
+              @cateIdList="cateIdList"
+            ></CateSelect>
           </el-form-item>
         </div>
       </el-form>
@@ -122,7 +112,7 @@ export default {
       }, // 添加用户的数据
       dialogVisible: false,
       fullscreenLoading: false,
-      selectedKeys: [], // 选择框数组
+      cateListType2: [],
     }
   },
   computed: {
@@ -130,7 +120,7 @@ export default {
       userById: (state) => state.user.userById,
       roleById: (state) => state.authority.roleById,
       catNameById: (state) => state.goods.catNameById,
-      cateListType2: (state) => state.goods.cateListType2,
+      cateList: (state) => state.goods.cateList,
     }),
   },
   props: ['showDialog', 'id', 'isUser', 'isRoles', 'isCate'],
@@ -139,7 +129,9 @@ export default {
       if (this.showDialog != 0) {
         this.dialogVisible = true
         if (this.showDialog == 1 && this.isCate) {
-          this.$store.dispatch('getCateListType2', { type: 2 })
+          this.$store.dispatch('getCateList', { type: 2 }).then(() => {
+            this.cateListType2 = this.cateList
+          })
         }
       }
     },
@@ -173,7 +165,6 @@ export default {
       if (this.isCate && this.showDialog == 1) {
         this.addForm.cat_pid = 0
         this.addForm.cat_level = 0
-        this.selectedKeys = []
       }
     },
     determine(add, edit, data) {
@@ -207,7 +198,7 @@ export default {
         this.determine('addUser', 'editUser', { id, mobile, email })
       } else if (this.isRoles) {
         this.determine('addRole', 'editRole', { id, roleName, roleDesc })
-      } else {
+      } else if (this.isCate) {
         this.determine('addCate', 'editCatName', { id, cat_name })
       }
     },
@@ -216,15 +207,10 @@ export default {
       Object.keys(this.addForm).forEach((key) => (this.addForm[key] = obj[key]))
       this.fullscreenLoading = false
     },
-    // 选择框发生变化
-    handleChange() {
-      if (this.selectedKeys.length > 0) {
-        this.addForm.cat_pid = this.selectedKeys[this.selectedKeys.length - 1]
-        this.addForm.cat_level = this.selectedKeys.length
-      } else {
-        this.addForm.cat_pid = 0
-        this.addForm.cat_level = 0
-      }
+    cateIdList(idList) {
+      const { cat_level, cat_pid } = idList
+      this.addForm.cat_level = cat_level
+      this.addForm.cat_pid = cat_pid
     },
   },
 }

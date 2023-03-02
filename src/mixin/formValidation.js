@@ -43,3 +43,16 @@ export const addFormRulesMixin = {
         }
     },
 }
+
+export const paramsFormRules = {
+    data() {
+        return {
+            formRules: {
+                attr_name: [
+                    { required: true, message: '请输入参数名', trigger: 'blur' },
+                    { min: 2, max: 6, message: '长度在2至6个字符', trigger: 'blur' },
+                ]
+            }
+        }
+    },
+}

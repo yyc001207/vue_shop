@@ -16,6 +16,7 @@
         <div class="toggle-button" @click="toggleCollapse">|||</div>
         <!-- 侧边栏菜单 -->
         <el-menu
+          ref="refMenu"
           :collapse="isCollapse"
           :collapse-transition="false"
           unique-opened
@@ -24,6 +25,7 @@
           active-text-color="#409eff"
           router
           :default-active="activePath"
+          @open="handlerOpen"
         >
           <!-- 一级菜单 -->
           <el-submenu
@@ -81,6 +83,17 @@ export default {
       }
     },
   },
+  watch: {
+    $route: {
+      handler(val) {
+        if (val.fullPath == '/welcome') {
+          this.$refs.refMenu.close(window.sessionStorage.getItem('activeIndex'))
+          this.$refs.refMenu.activeIndex = null
+          window.sessionStorage.removeItem('activePath')
+        }
+      },
+    },
+  },
   mounted() {
     this.getMenuList()
     this.activePath = window.sessionStorage.getItem('activePath')
@@ -104,9 +117,10 @@ export default {
     saveNavState(activePath) {
       window.sessionStorage.setItem('activePath', activePath)
     },
-  
+    handlerOpen(key) {
+      window.sessionStorage.setItem('activeIndex', key)
+    },
   },
-  
 }
 </script>
 

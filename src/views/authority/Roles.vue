@@ -163,13 +163,7 @@ export default {
     this.getRolesList()
   },
   watch: {
-    rightById() {
-      this.rolesList.forEach((item) => {
-        if ((item.id = this.roleId)) {
-          item.children = this.rightById
-        }
-      })
-    },
+    rightById() {},
   },
   methods: {
     // 获取角色列表
@@ -189,12 +183,20 @@ export default {
     },
     // 根据id删除角色
     removeRoleById(id) {
-      this.remove('removeRoleById', id, this.getRolesList)
+      this.$remove('removeRoleById', id).then(() => {
+        this.getRolesList()
+      })
     },
     // 根据id删除权限
     removeRightById(role, rightId) {
       let roleId = (this.roleId = role.id)
-      this.remove('removeRightById', { roleId, rightId })
+      this.$remove('removeRightById', { roleId, rightId }).then(() => {
+        this.rolesList.forEach((item) => {
+          if ((item.id = this.roleId)) {
+            item.children = this.rightById
+          }
+        })
+      })
     },
     // 点击分配权限按钮
     showSetRightDialog(role) {
