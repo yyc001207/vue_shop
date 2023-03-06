@@ -87,7 +87,7 @@ export default {
         pagesize: 3, // 每页数据条数
       },
       total: 0, // 数据总条数
-      showDialog: 0,// 控制用户对话框显示隐藏，0隐藏，1添加，2修改
+      showDialog: 0, // 控制用户对话框显示隐藏，0隐藏，1添加，2修改
       id: '',
       isCate: true,
       cateListPage: {}, // 具有分页的分类列表

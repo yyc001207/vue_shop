@@ -2,7 +2,7 @@ import axios from 'axios'
 import { Message } from 'element-ui'
 import store from '@/store'
 import { getToken } from "@/utils/auth"
-
+import nProgress from "nprogress"
 
 const requests = axios.create({
     baseURL: '/api/private/v1',
@@ -13,6 +13,7 @@ const requests = axios.create({
 requests.interceptors.request.use(
 
     config => {
+        nProgress.start()
         if (store.getters.token) {
             config.headers.Authorization = getToken()
         }
@@ -26,6 +27,7 @@ requests.interceptors.request.use(
 // 响应拦截器
 requests.interceptors.response.use(
     response => {
+        nProgress.done()
         const res = response.data
         if (res.meta.status == 200 || res.meta.status == 201) {
             return res

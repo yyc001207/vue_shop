@@ -1,13 +1,17 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Login from '@/views/Login'
-import Home from "@/views/Home";
-import Welcome from '@/views/Welcome'
-import Users from '@/views/user/Users'
-import AuthorityList from '@/views/authority/AuthorityList'
-import Roles from '@/views/authority/Roles'
-import Categories from '@/views/goods/Categories'
-import Params from '@/views/goods/Params'
+
+const Login = () => import(/* webpackChunkName: "login_home_welcome" */ '@/views/Login')
+const Home = () => import(/* webpackChunkName: "login_home_welcome" */ '@/views/Home')
+const Welcome = () => import(/* webpackChunkName: "login_home_welcome" */ '@/views/Welcome')
+
+const Users = () => import(/* webpackChunkName: "Users_AuthorityList_Roles" */ '@/views/user/Users')
+const AuthorityList = () => import(/* webpackChunkName: "Users_AuthorityList_Roles" */ '@/views/authority/AuthorityList')
+const Roles = () => import(/* webpackChunkName: "Users_AuthorityList_Roles" */ '@/views/authority/Roles')
+
+const Categories = () => import(/* webpackChunkName: "Categories_Params" */ '@/views/goods/Categories')
+const Params = () => import(/* webpackChunkName: "Categories_Params" */ '@/views/goods/Params')
+
 Vue.use(VueRouter)
 
 const routes = [
